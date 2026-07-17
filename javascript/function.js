@@ -7,5 +7,5 @@ function foo1() {
 function foo2() {
     return
     bar: 'hello'
-
 }
+// undefined

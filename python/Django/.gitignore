@@ -1,0 +1,65 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles/          # collected static files (regenerate via collectstatic)
+# Note: don't ignore /static/ (your source static files) — only the collected output
+
+# Environments / secrets
+.env
+.env.*
+!.env.example
+venv/
+env/
+ENV/
+.venv/
+
+# Django migrations — usually COMMIT these, don't ignore
+# (see note below)
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# mypy / linting caches
+.mypy_cache/
+.ruff_cache/
+
+# AI tool configs (personal/local — same logic as before)
+.claude/
+.agents/
+.windsurf/
+.cursor/

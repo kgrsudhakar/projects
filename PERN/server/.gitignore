@@ -1,0 +1,27 @@
+# Node / PERN standard
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+
+# Prisma
+# Do NOT ignore schema.prisma or migrations — those are source of truth
+# But ignore generated client if you generate into node_modules (default) or a custom folder you don't want tracked
+/generated/prisma
+prisma/dev.db          # if using SQLite locally
+prisma/dev.db-journal
+
+# AI coding assistant tool folders (usually local/personal)
+.claude/
+.agents/
+.windsurf/
+.cursor/
+skills.md              # only if it's your personal notes, not project docs
+
+# Logs, OS, editor junk
+*.log
+.DS_Store
+.vscode/
+.idea/

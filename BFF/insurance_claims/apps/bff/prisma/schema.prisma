@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  AGENT
+  CUSTOMER
+  ADJUSTER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+enum PolicyStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum ClaimStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ASSIGNED
+  APPROVED
+  REJECTED
+  PAYMENT_PENDING
+  PAID
+  CLOSED
+}
+
+model User {
+
+  id           String      @id @default(uuid())
+
+  firstName    String      @map("first_name")
+  lastName     String      @map("last_name")
+
+  email        String      @unique
+
+  password     String
+
+  phone        String?
+
+  role         UserRole
+
+  status       UserStatus  @default(ACTIVE)
+
+  lastLogin    DateTime?   @map("last_login")
+
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  policies     Policy[]
+
+  customerClaims Claim[] @relation("CustomerClaims")
+
+  adjusterClaims Claim[] @relation("AdjusterClaims")
+
+  notifications Notification[]
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Policy {
+
+  id                String @id @default(uuid())
+
+  policyNumber      String @unique @map("policy_number")
+
+  policyType        String @map("policy_type")
+
+  customerId        String @map("customer_id")
+
+  premiumAmount     Decimal @db.Decimal(12,2) @map("premium_amount")
+
+  coverageAmount    Decimal @db.Decimal(12,2) @map("coverage_amount")
+
+  deductibleAmount  Decimal @db.Decimal(12,2) @map("deductible_amount")
+
+  startDate         DateTime @map("start_date")
+
+  endDate           DateTime @map("end_date")
+
+  status            PolicyStatus @default(ACTIVE)
+
+  customer User @relation(fields:[customerId],references:[id])
+
+  claims Claim[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("policies")
+}
+
+model Claim {
+
+  id String @id @default(uuid())
+
+  claimNumber String @unique @map("claim_number")
+
+  policyId String @map("policy_id")
+
+  customerId String @map("customer_id")
+
+  adjusterId String? @map("adjuster_id")
+
+  title String
+
+  description String
+
+  incidentDate DateTime @map("incident_date")
+
+  claimAmount Decimal @db.Decimal(12,2) @map("claim_amount")
+
+  approvedAmount Decimal? @db.Decimal(12,2) @map("approved_amount")
+
+  status ClaimStatus @default(DRAFT)
+
+  policy Policy @relation(fields:[policyId],references:[id])
+
+  customer User @relation("CustomerClaims",fields:[customerId],references:[id])
+
+  adjuster User? @relation("AdjusterClaims",fields:[adjusterId],references:[id])
+
+  documents ClaimDocument[]
+
+  timeline ClaimTimeline[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("claims")
+}
+
+model ClaimDocument {
+
+  id String @id @default(uuid())
+
+  claimId String @map("claim_id")
+
+  fileName String @map("file_name")
+
+  originalName String @map("original_name")
+
+  fileUrl String @map("file_url")
+
+  mimeType String @map("mime_type")
+
+  fileSize Int @map("file_size")
+
+  uploadedBy String @map("uploaded_by")
+
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  claim Claim @relation(fields:[claimId],references:[id])
+
+  @@map("claim_documents")
+}
+
+model ClaimTimeline {
+
+  id String @id @default(uuid())
+
+  claimId String @map("claim_id")
+
+  status ClaimStatus
+
+  remarks String
+
+  updatedBy String @map("updated_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  claim Claim @relation(fields:[claimId],references:[id])
+
+  @@map("claim_timeline")
+}
+
+model Notification {
+
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+
+  title String
+
+  message String
+
+  isRead Boolean @default(false) @map("is_read")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields:[userId],references:[id])
+
+  @@map("notifications")
+}
+
+model AuditLog {
+
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+
+  action String
+
+  module String
+
+  entityId String @map("entity_id")
+
+  oldValue Json? @map("old_value")
+
+  newValue Json? @map("new_value")
+
+  ipAddress String? @map("ip_address")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields:[userId],references:[id])
+
+  @@map("audit_logs")
+}
+
+

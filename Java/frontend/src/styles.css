@@ -2,7 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smoke test: If the background is light-blue, CSS is loading */
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+}
+
+/* Force images to be responsive just in case */
+img {
+  max-width: 100%;
+  height: auto;
 }

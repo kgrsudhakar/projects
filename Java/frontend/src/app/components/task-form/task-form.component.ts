@@ -9,16 +9,20 @@ import { EventEmitter, Output } from '@angular/core';
   imports: [],
   template: `
     <form (submit)="onSubmit($event)" class="flex flex-col sm:flex-row gap-3">
-      <input
-        #titleInput
-        type="text"
-        placeholder="What needs to be done?"
-        class="flex-1 p-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-        required>
+      <div class="relative flex-1">
+        <input
+          #titleInput
+          type="text"
+          placeholder="What needs to be done?"
+          class="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-transparent outline-none transition-all text-slate-700 placeholder-slate-400"
+          required>
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xl">✍️</span>
+      </div>
       <button
         type="submit"
-        class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-md hover:shadow-lg">
-        Add Task
+        class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-md hover:shadow-blue-200 flex items-center justify-center gap-2">
+        <span>Add Task</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
       </button>
     </form>
   `

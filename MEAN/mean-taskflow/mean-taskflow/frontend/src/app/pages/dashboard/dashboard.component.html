@@ -1,0 +1,78 @@
+<div class="shell">
+  <header class="topbar">
+    <div class="brand-mark">TaskFlow</div>
+    <div class="topbar-right">
+      @if (auth.currentUser(); as user) {
+        <div class="me">
+          <span class="avatar" [style.background]="user.avatarColor">{{ initials(user.name) }}</span>
+          <span class="me-name">{{ user.name }}</span>
+        </div>
+      }
+      <button class="btn btn-ghost" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="content-header">
+      <div>
+        <h1>Your projects</h1>
+        <p class="sub">Boards you own or have been added to.</p>
+      </div>
+      <button class="btn btn-primary" (click)="openCreate()">New project</button>
+    </div>
+
+    @if (loading()) {
+      <div class="empty-state">Loading your projects…</div>
+    } @else if (projects().length === 0) {
+      <div class="empty-state">
+        <h3>No projects yet</h3>
+        <p>Create your first board to start tracking work with your team in real time.</p>
+        <button class="btn btn-primary" (click)="openCreate()">Create a project</button>
+      </div>
+    } @else {
+      <div class="project-grid">
+        @for (project of projects(); track project._id) {
+          <button class="project-tile" (click)="openProject(project._id)">
+            <span class="tile-bar" [style.background]="project.color"></span>
+            <h3>{{ project.name }}</h3>
+            <p class="tile-desc">{{ project.description || 'No description yet.' }}</p>
+            <div class="tile-footer">
+              <div class="tile-members">
+                @for (m of project.members.slice(0, 4); track m._id) {
+                  <span class="avatar avatar-stack" [style.background]="m.avatarColor" [title]="m.name">{{ initials(m.name) }}</span>
+                }
+                @if (project.members.length > 4) {
+                  <span class="avatar avatar-stack" style="background: var(--ink-soft)">+{{ project.members.length - 4 }}</span>
+                }
+              </div>
+              <span class="tile-owner">{{ project.owner._id === auth.currentUser()?._id ? 'You own this' : 'Owner: ' + project.owner.name }}</span>
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+@if (showCreate()) {
+  <div class="modal-backdrop" (click)="showCreate.set(false)">
+    <form class="modal-card" (click)="$event.stopPropagation()" (ngSubmit)="createProject()">
+      <h2>New project</h2>
+      <div class="field">
+        <label for="pname">Project name</label>
+        <input id="pname" type="text" [(ngModel)]="newName" name="pname" placeholder="Website Relaunch" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="pdesc">Description (optional)</label>
+        <textarea id="pdesc" [(ngModel)]="newDescription" name="pdesc" rows="3" placeholder="What is this project about?"></textarea>
+      </div>
+      @if (errorMsg()) {
+        <div class="error-text">{{ errorMsg() }}</div>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showCreate.set(false)">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="creating()">{{ creating() ? 'Creating…' : 'Create project' }}</button>
+      </div>
+    </form>
+  </div>
+}

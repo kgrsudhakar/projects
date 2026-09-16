@@ -1,0 +1,28 @@
+<div class="page">
+  <header>
+    <h1>MEAN Task Manager</h1>
+    <p>Angular + Express + Node.js + MongoDB</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Add Task</h2><input [(ngModel)]="title" placeholder="Task title" (keyup.enter)="add()"><textarea
+        [(ngModel)]="description" placeholder="Description"></textarea><button (click)="add()">Add Task</button>
+    </section>
+    <p class="error" *ngIf="error">{{error}}</p>
+    <section class="card">
+      <div class="row">
+        <h2>Tasks</h2><button class="secondary" (click)="load()">Refresh</button>
+      </div>
+      <p *ngIf="loading">Loading...</p>
+      <p *ngIf="!loading && !tasks.length">No tasks yet.</p>
+      <article class="task" *ngFor="let task of tasks">
+        <div>
+          <h3 [class.done]="task.completed">{{task.title}}</h3>
+          <p>{{task.description}}</p>
+        </div>
+        <div class="actions"><button (click)="toggle(task)">{{task.completed?'Undo':'Complete'}}</button><button
+            class="danger" (click)="remove(task)">Delete</button></div>
+      </article>
+    </section>
+  </main>
+</div>

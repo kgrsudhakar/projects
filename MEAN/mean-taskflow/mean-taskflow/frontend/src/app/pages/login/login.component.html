@@ -1,0 +1,41 @@
+<div class="auth-shell">
+  <div class="auth-brand">
+    <div class="brand-mark">TaskFlow</div>
+    <h1>Work moves.<br />Watch it happen.</h1>
+    <p class="brand-copy">
+      Every card, comment, and status change lands on your team's board the instant it happens —
+      no refresh, no waiting.
+    </p>
+    <div class="brand-ticks">
+      <div class="tick"><span class="dot" style="background: var(--accent-amber)"></span>Live kanban board with drag-free move controls</div>
+      <div class="tick"><span class="dot" style="background: var(--accent-blue)"></span>Presence — see who else is looking right now</div>
+      <div class="tick"><span class="dot" style="background: var(--accent-teal)"></span>Threaded comments that sync across your team</div>
+    </div>
+  </div>
+
+  <div class="auth-form-panel">
+    <form class="auth-card" (ngSubmit)="submit()" novalidate>
+      <h2>Sign in</h2>
+      <p class="auth-sub">Pick up your boards where you left off.</p>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" [(ngModel)]="email" placeholder="you@company.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" [(ngModel)]="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      @if (errorMsg()) {
+        <div class="error-text">{{ errorMsg() }}</div>
+      }
+
+      <button type="submit" class="btn btn-primary auth-submit" [disabled]="loading()">
+        {{ loading() ? 'Signing in…' : 'Sign in' }}
+      </button>
+
+      <p class="auth-switch">New here? <a routerLink="/register">Create an account</a></p>
+    </form>
+  </div>
+</div>

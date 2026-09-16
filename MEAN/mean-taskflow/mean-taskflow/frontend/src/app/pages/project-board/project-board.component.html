@@ -1,0 +1,266 @@
+<div class="board-shell">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a routerLink="/dashboard" class="back-link">← Boards</a>
+      @if (project(); as p) {
+        <span class="bar-dot" [style.background]="p.color"></span>
+        <h1>{{ p.name }}</h1>
+      }
+    </div>
+
+    <div class="topbar-right">
+      @if (presence().length > 0) {
+        <div class="presence-stack" [title]="presence().length + ' online'">
+          @for (person of presence().slice(0, 5); track person.userId) {
+            <span class="avatar avatar-stack presence-avatar" [style.background]="person.avatarColor" [title]="person.name + ' is viewing'">
+              {{ initials(person.name) }}
+            </span>
+          }
+        </div>
+      }
+      <button class="btn btn-ghost" (click)="showInvite.set(true)">Invite</button>
+      <button class="btn btn-ghost" (click)="showSettings.set(true)">Members</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="board-loading">Loading board…</div>
+  } @else {
+    <main class="board">
+      @for (col of columns; track col.key) {
+        <section class="column" (dragover)="$event.preventDefault()" (drop)="onDrop(col.key)">
+          <div class="column-head">
+            <span class="column-accent" [style.background]="col.accent"></span>
+            <h2>{{ col.label }}</h2>
+            <span class="column-count">{{ tasksFor(col.key).length }}</span>
+          </div>
+
+          <div class="column-body">
+            @for (task of tasksFor(col.key); track task._id) {
+              <article
+                class="task-card"
+                draggable="true"
+                (dragstart)="onDragStart(task)"
+                (click)="openTask(task)"
+              >
+                <div class="task-top">
+                  <span class="priority-dot" [style.background]="priorityColor[task.priority]" [title]="task.priority + ' priority'"></span>
+                  <span class="task-title">{{ task.title }}</span>
+                </div>
+                @if (task.dueDate) {
+                  <div class="task-due">Due {{ task.dueDate | date: 'MMM d' }}</div>
+                }
+                <div class="task-footer">
+                  <div class="task-move">
+                    @for (c of columns; track c.key) {
+                      @if (c.key !== task.status) {
+                        <button
+                          class="move-btn"
+                          type="button"
+                          (click)="$event.stopPropagation(); moveTask(task, c.key)"
+                          [title]="'Move to ' + c.label"
+                        >{{ c.label }}</button>
+                      }
+                    }
+                  </div>
+                  @if (task.assignee) {
+                    <span class="avatar task-avatar" [style.background]="task.assignee.avatarColor" [title]="task.assignee.name">
+                      {{ initials(task.assignee.name) }}
+                    </span>
+                  }
+                </div>
+              </article>
+            }
+
+            @if (showAddTask() === col.key) {
+              <form class="add-task-form" (ngSubmit)="submitAddTask()">
+                <input
+                  type="text"
+                  [(ngModel)]="newTaskTitle"
+                  name="newTaskTitle"
+                  placeholder="Task title…"
+                  autocomplete="off"
+                  autofocus
+                />
+                <div class="add-task-actions">
+                  <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="showAddTask.set(null)">Cancel</button>
+                </div>
+              </form>
+            } @else {
+              <button class="add-task-trigger" (click)="openAddTask(col.key)">+ Add task</button>
+            }
+          </div>
+        </section>
+      }
+    </main>
+  }
+</div>
+
+<!-- Task detail panel -->
+@if (selectedTask(); as task) {
+  <div class="modal-backdrop" (click)="closeTask()">
+    <aside class="task-panel" (click)="$event.stopPropagation()">
+      <div class="panel-head">
+        <input
+          class="panel-title-input"
+          type="text"
+          [ngModel]="task.title"
+          (ngModelChange)="updateSelectedTask({ title: $event })"
+        />
+        <button class="close-btn" (click)="closeTask()">✕</button>
+      </div>
+
+      <div class="panel-row">
+        <label>Status</label>
+        <select [ngModel]="task.status" (ngModelChange)="updateSelectedTask({ status: $event })">
+          @for (c of columns; track c.key) {
+            <option [value]="c.key">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="panel-row">
+        <label>Priority</label>
+        <select [ngModel]="task.priority" (ngModelChange)="updateSelectedTask({ priority: $event })">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div class="panel-row">
+        <label>Assignee</label>
+        <select
+          [ngModel]="task.assignee?._id || ''"
+          (ngModelChange)="updateSelectedTask({ assignee: $event || null })"
+        >
+          <option value="">Unassigned</option>
+          @if (project(); as p) {
+            @for (m of p.members; track m._id) {
+              <option [value]="m._id">{{ m.name }}</option>
+            }
+          }
+        </select>
+      </div>
+
+      <div class="panel-row">
+        <label>Due date</label>
+        <input
+          type="date"
+          [ngModel]="task.dueDate ? (task.dueDate | date: 'yyyy-MM-dd') : ''"
+          (ngModelChange)="updateSelectedTask({ dueDate: $event || null })"
+        />
+      </div>
+
+      <div class="panel-row panel-row-block">
+        <label>Description</label>
+        <textarea
+          rows="4"
+          placeholder="Add more detail…"
+          [ngModel]="task.description"
+          (ngModelChange)="updateSelectedTask({ description: $event })"
+        ></textarea>
+      </div>
+
+      <button class="btn btn-danger panel-delete" (click)="deleteTask(task)">Delete task</button>
+
+      <div class="panel-divider"></div>
+
+      <h3 class="comments-heading">Comments</h3>
+      <div class="comments-list">
+        @for (c of comments(); track c._id) {
+          <div class="comment">
+            <span class="avatar comment-avatar" [style.background]="c.author.avatarColor">{{ initials(c.author.name) }}</span>
+            <div class="comment-body">
+              <div class="comment-meta">
+                <span class="comment-author">{{ c.author.name }}</span>
+                <span class="comment-time">{{ c.createdAt | date: 'MMM d, h:mm a' }}</span>
+                @if (c.author._id === auth.currentUser()?._id) {
+                  <button class="comment-delete" (click)="deleteComment(c)">Delete</button>
+                }
+              </div>
+              <p class="comment-text">{{ c.text }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="no-comments">No comments yet. Start the discussion below.</p>
+        }
+      </div>
+
+      @if (typingUsers().length > 0) {
+        <p class="typing-indicator">{{ typingUsers().join(', ') }} {{ typingUsers().length === 1 ? 'is' : 'are' }} typing…</p>
+      }
+
+      <form class="comment-form" (ngSubmit)="submitComment()">
+        <input
+          type="text"
+          [(ngModel)]="newComment"
+          name="newComment"
+          placeholder="Write a comment…"
+          autocomplete="off"
+          (input)="onCommentInput()"
+        />
+        <button type="submit" class="btn btn-primary btn-sm">Post</button>
+      </form>
+    </aside>
+  </div>
+}
+
+<!-- Invite modal -->
+@if (showInvite()) {
+  <div class="modal-backdrop" (click)="showInvite.set(false)">
+    <form class="modal-card" (click)="$event.stopPropagation()" (ngSubmit)="submitInvite()">
+      <h2>Invite a teammate</h2>
+      <p class="modal-sub">They'll need an existing TaskFlow account — invite by the email they registered with.</p>
+      <div class="field">
+        <label for="inviteEmail">Email</label>
+        <input id="inviteEmail" type="email" [(ngModel)]="inviteEmail" name="inviteEmail" placeholder="teammate@company.com" />
+      </div>
+      @if (inviteError()) {
+        <div class="error-text">{{ inviteError() }}</div>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showInvite.set(false)">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="inviteBusy()">{{ inviteBusy() ? 'Adding…' : 'Add to project' }}</button>
+      </div>
+    </form>
+  </div>
+}
+
+<!-- Members / settings modal -->
+@if (showSettings()) {
+  <div class="modal-backdrop" (click)="showSettings.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h2>Members</h2>
+      @if (project(); as p) {
+        <ul class="member-list">
+          <li class="member-row">
+            <span class="avatar" [style.background]="p.owner.avatarColor">{{ initials(p.owner.name) }}</span>
+            <span class="member-name">{{ p.owner.name }}</span>
+            <span class="member-role">Owner</span>
+          </li>
+          @for (m of p.members; track m._id) {
+            @if (m._id !== p.owner._id) {
+              <li class="member-row">
+                <span class="avatar" [style.background]="m.avatarColor">{{ initials(m.name) }}</span>
+                <span class="member-name">{{ m.name }}</span>
+                @if (isOwner()) {
+                  <button class="member-remove" (click)="removeMember(m._id)">Remove</button>
+                }
+              </li>
+            }
+          }
+        </ul>
+
+        @if (isOwner()) {
+          <div class="panel-divider"></div>
+          <button class="btn btn-danger" (click)="deleteProject()">Delete this project</button>
+        }
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showSettings.set(false)">Close</button>
+      </div>
+    </div>
+  </div>
+}

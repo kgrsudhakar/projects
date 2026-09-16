@@ -1,0 +1,58 @@
+<div class="chat-wrapper">
+
+  <!-- Join screen -->
+  <div class="join-screen" *ngIf="!joined">
+    <h1>MEAN Real-Time Chat</h1>
+    <input
+      type="text"
+      placeholder="Enter your name"
+      [(ngModel)]="username"
+      (keyup.enter)="join()"
+    />
+    <input type="text" placeholder="Room" [(ngModel)]="room" />
+    <button (click)="join()" [disabled]="!username.trim()">Join Room</button>
+  </div>
+
+  <!-- Chat screen -->
+  <div class="chat-screen" *ngIf="joined">
+    <aside class="sidebar">
+      <h3>Room: {{ room }}</h3>
+      <h4>Online ({{ onlineUsers.length }})</h4>
+      <ul>
+        <li *ngFor="let user of onlineUsers">{{ user }}</li>
+      </ul>
+    </aside>
+
+    <main class="messages-panel">
+      <div class="system-messages" *ngIf="systemMessages.length">
+        <div class="system-msg" *ngFor="let msg of systemMessages">{{ msg }}</div>
+      </div>
+
+      <div class="messages-list">
+        <div
+          class="message"
+          *ngFor="let msg of messages"
+          [class.own]="msg.username === username"
+        >
+          <span class="msg-author">{{ msg.username }}</span>
+          <span class="msg-text">{{ msg.text }}</span>
+        </div>
+        <div #scrollAnchor></div>
+      </div>
+
+      <div class="typing-indicator" *ngIf="typingLabel">{{ typingLabel }}</div>
+
+      <div class="composer">
+        <input
+          type="text"
+          placeholder="Type a message..."
+          [(ngModel)]="draft"
+          (input)="onTyping()"
+          (keyup.enter)="send()"
+        />
+        <button (click)="send()" [disabled]="!draft.trim()">Send</button>
+      </div>
+    </main>
+  </div>
+
+</div>

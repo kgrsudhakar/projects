@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: employee-service
+
+  # Demo uses in-memory H2. Replace with your real DB (MySQL/Postgres/etc.)
+  datasource:
+    url: jdbc:h2:mem:employeedb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    # Without this, Spring Boot runs data.sql BEFORE Hibernate creates the
+    # schema (since schema creation is deferred until the EntityManagerFactory
+    # initializes), causing "Table not found" on startup. This defers data.sql
+    # until after Hibernate has created the tables.
+    defer-datasource-initialization: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+
+external:
+  position-api:
+    base-url: http://localhost:9090   # point this at the real Position API
+    timeout-ms: 3000
+
+logging:
+  level:
+    com.example.employeeservice: INFO

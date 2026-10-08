@@ -1,0 +1,2 @@
+CREATE DATABASE policydb;
+CREATE DATABASE claimdb;

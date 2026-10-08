@@ -1,0 +1,9 @@
+server.port: 8082
+policy-service.url: ${POLICY_SERVICE_URL:http://localhost:8081}
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/claimdb}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:postgres}
+  jpa:
+    hibernate.ddl-auto: update

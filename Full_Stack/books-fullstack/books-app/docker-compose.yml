@@ -1,0 +1,32 @@
+# Runs the app with PostgreSQL:  docker compose up --build
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: booksdb
+      POSTGRES_USER: books
+      POSTGRES_PASSWORD: books
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U books -d booksdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_URL: jdbc:postgresql://db:5432/booksdb
+      DB_USER: books
+      DB_PASSWORD: books
+      JWT_SECRET: please-change-this-to-a-long-random-secret-value
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

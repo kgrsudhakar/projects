@@ -1,0 +1,17 @@
+server.port: 8080
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: policy-service
+          uri: ${POLICY_URL:http://localhost:8081}
+          predicates: [ "Path=/api/policies/**" ]
+        - id: claim-service
+          uri: ${CLAIM_URL:http://localhost:8082}
+          predicates: [ "Path=/api/claims/**" ]

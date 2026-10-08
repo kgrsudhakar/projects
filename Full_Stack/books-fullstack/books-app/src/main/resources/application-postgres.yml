@@ -1,0 +1,9 @@
+# Activate with: --spring.profiles.active=postgres
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/booksdb}
+    username: ${DB_USER:books}
+    password: ${DB_PASSWORD:books}
+  h2:
+    console:
+      enabled: false

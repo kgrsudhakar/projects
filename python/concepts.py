@@ -204,6 +204,6 @@ class Employee:
     def is_valid_name(name):
         return isinstance(name, str) and len(name) > 0
 
-emp = Employee.from_string("Sudhakar,Architect")
+emp = Employee.from_string("Sudhakar, Architect")
 print(emp.name, emp.company)
 print(Employee.is_valid_name("Sudhakar"))
